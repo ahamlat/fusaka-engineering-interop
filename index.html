@@ -2,23 +2,108 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fusaka Engineering Interop</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; }
-    .sidebar { width: 220px; background: #f4f4f4; padding: 1em; box-sizing: border-box; }
-    .sidebar h2 { font-size: 1.2em; margin-top: 0; }
-    .sidebar ul { list-style: none; padding: 0; }
-    .sidebar li { margin: 0.5em 0; }
-    .sidebar a { color: #0366d6; text-decoration: none; }
-    .sidebar a:hover { text-decoration: underline; }
-    .content { flex: 1; padding: 1.5em; overflow-y: auto; }
-    section { margin-bottom: 2em; }
-    h2 { border-bottom: 2px solid #e1e4e8; padding-bottom: 0.3em; color: #333; }
-    h3 { margin-top: 1em; color: #444; }
+    :root {
+      --sidebar-width: 220px;
+      --sidebar-bg: #fafafa;
+      --sidebar-color: #333;
+      --header-bg: #fafafa;
+      --accent: #007acc;
+      --text-color: #333;
+      --bg-color: #fff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; display: flex; min-height: 100vh; color: var(--text-color); background: var(--bg-color); }
+    header {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 50px;
+      background: var(--header-bg);
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      transition: left .3s;
+      z-index: 1000;
+    }
+    header .toggle {
+      display: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      padding: 1rem;
+      border-right: 1px solid #e0e0e0;
+      overflow-y: auto;
+      transition: transform .3s;
+    }
+    .sidebar h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .sidebar ul { list-style: none; }
+    .sidebar li { margin: 0.5rem 0; }
+    .sidebar a {
+      color: var(--sidebar-color);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .sidebar a:hover {
+      color: var(--accent);
+    }
+    main {
+      margin-top: 50px;
+      margin-left: var(--sidebar-width);
+      padding: 1.5rem;
+      flex: 1;
+      background: var(--bg-color);
+    }
+    section { margin-bottom: 2rem; }
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.2rem;
+      color: var(--text-color);
+    }
+    h3 {
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-color);
+    }
+    ul { padding-left: 1.2rem; }
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+    code {
+      background: #f0f0f0;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    @media (max-width: 760px) {
+      .sidebar { transform: translateX(-100%); position: fixed; z-index: 1001; background: var(--sidebar-bg); }
+      .sidebar.open { transform: translateX(0); }
+      header { left: 0; }
+      header .toggle { display: block; }
+      main { margin-left: 0; }
+    }
   </style>
 </head>
 <body>
-<nav class="sidebar">
+<div class="sidebar" id="sidebar">
   <h2>Menu</h2>
   <ul>
     <li><a href="#introduction">Introduction</a></li>
@@ -27,14 +112,18 @@
     <li><a href="#devnet-0">Devnet 0 - Run the network</a></li>
     <li><a href="#interop-images">Interop images</a></li>
     <li><a href="#fusaka-meta-eip">Fusaka Meta EIP (Besu)</a></li>
-    <li><a href="#performance-l1">Performance and L1 scalability</a></li>
+    <li><a href="#performance-l1">Performance & L1 scalability</a></li>
     <li><a href="#bals">Block-Level Access Lists (BALs)</a></li>
   </ul>
-</nav>
-<main class="content">
+</div>
+<header>
+  <span class="toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</span>
+  <h1 style="font-size:1rem; margin-left:1rem;">Fusaka Engineering Interop</h1>
+</header>
+<main>
   <section id="introduction">
     <h2>Introduction</h2>
-    <p>This page gathers all Fusaka Engineering Interop details. For the full Berlin agenda and detailed schedule, see <a href="https://notes.ethereum.org/@timbeiko/berlin-agenda" target="_blank">Berlin Agenda</a>.</p>
+    <p>This page gathers all Fusaka Engineering Interop details. For the full Berlin agenda, see <a href="https://notes.ethereum.org/@timbeiko/berlin-agenda" target="_blank">Berlin Agenda</a>.</p>
   </section>
   <section id="pre-work">
     <h2>Pre-work</h2>
@@ -45,17 +134,17 @@
         <strong>Devnet 1:</strong>
         <ul>
           <li><code>kurtosis run --enclave fusakadevnet1 github.com/ethpandaops/ethereum-package --args-file ./fusaka-devnet-1.yaml --image-download always</code></li>
-          <li>Edit config (e.g., Besu + 2 ELs, max 2 CLs): <a href="https://notes.ethereum.org/@ethpandaops/fusaka-devnet-1#Kurtosis-Interop-Conifg-Pre-devnet-testing" target="_blank">Config</a></li>
+          <li>Edit config: <a href="https://notes.ethereum.org/@ethpandaops/fusaka-devnet-1#Kurtosis-Interop-Conifg-Pre-devnet-testing" target="_blank">Config</a></li>
         </ul>
       </li>
       <li>
         <strong>Devnet 0:</strong>
         <ul>
           <li><code>kurtosis run --enclave fusakadevnet0 github.com/ethpandaops/ethereum-package --args-file ./fusaka-devnet-0.yaml --image-download always</code></li>
-          <li>Edit config as needed; note Erigon image is incorrect as of 2025-06-05 – <a href="https://notes.ethereum.org/@ethpandaops/fusaka-devnet-0#Kurtosis-Interop-Conifg-Pre-devnet-testing" target="_blank">Config</a></li>
+          <li>Edit config: <a href="https://notes.ethereum.org/@ethpandaops/fusaka-devnet-0#Kurtosis-Interop-Conifg-Pre-devnet-testing" target="_blank">Config</a></li>
         </ul>
       </li>
-      <li>Inspect a node: <code>kurtosis service logs -f fusakadevnet1 el-2-besu-lodestar</code></li>
+      <li>Inspect logs: <code>kurtosis service logs -f fusakadevnet1 el-2-besu-lodestar</code></li>
       <li>Clean all: <code>kurtosis clean -a</code></li>
     </ul>
   </section>
@@ -63,7 +152,7 @@
     <h2>Interop images</h2>
     <ul>
       <li>Branches built hourly: <a href="https://github.com/ethpandaops/eth-client-docker-image-builder/blob/master/branches.yaml" target="_blank">branches.yaml</a></li>
-      <li>Trigger manual build via Discord: <code>/build client-el {client} {repo?} {ref?} {docker_tag?} {build_args?}</code></li>
+      <li>Trigger build via Discord: <code>/build client-el {client} ...</code></li>
     </ul>
   </section>
   <section id="fusaka-meta-eip">
@@ -71,85 +160,64 @@
     <p><a href="https://eips.ethereum.org/EIPS/eip-7607" target="_blank">EIP-7607</a></p>
     <h3>Devnet‑2 (Targets)</h3>
     <ul>
-      <li>✅ EIP‑5920: PAY opcode (Besu PR)</li>
-      <li>Draft PR: RIP‑7212: Precompile for secp256r1 Curve Support</li>
-      <li>EIP‑7907: Meter Contract Code Size And Increase Limit (Issue)</li>
-      <li>EIP‑7934: RLP Execution Block Size Limit (Issue)</li>
+      <li>✅ EIP‑5920: PAY opcode</li>
+      <li>Draft PR: RIP‑7212: secp256r1 support</li>
+      <li>EIP‑7907: Code size & limit</li>
+      <li>EIP‑7934: Block size limit</li>
     </ul>
     <h3>Devnet‑1 Contains</h3>
     <ul>
-      <li>✅ EIP‑7825: Transaction Gas Limit Cap</li>
-      <li>✅ EIP‑7918: Blob base fee bounded by execution cost</li>
-      <li>✅ EIP‑7594: PeerDAS – Peer Data Availability Sampling</li>
-      <li>✅ EIP‑7823: Set upper bounds for MODEXP</li>
-      <li>✅ EIP‑7883: ModExp Gas Cost Increase</li>
-      <li>✅ EIP‑7892: Blob Parameter Only Hardforks</li>
+      <li>✅ EIP‑7825: Gas Limit Cap</li>
+      <li>✅ EIP‑7918: Blob Base Fee</li>
+      <li>✅ EIP‑7594: PeerDAS</li>
+      <li>✅ EIP‑7823: MODEXP Upper Bounds</li>
+      <li>✅ EIP‑7883: ModExp Gas Cost</li>
+      <li>✅ EIP‑7892: Blob Hardforks</li>
     </ul>
   </section>
   <section id="performance-l1">
-    <h2>Performance and L1 scalability</h2>
+    <h2>Performance &amp; L1 scalability</h2>
     <h3>Gas Limit ≥ 60M</h3>
     <ul>
       <li>Sepolia analysis (60M gas on Besu): <a href="https://docs.google.com/document/d/1fVXFp9Lcw_NiryjqiYOsjZRPHWjmucb4HpJhaXaEmgw/edit?tab=t.0" target="_blank">Doc</a></li>
-      <li>Discussion on TG: default 60M gas on Besu? (Erigon, Nethermind, Reth already)</li>
+      <li>Discussion: default 60M gas on Besu?</li>
     </ul>
-    <h3>EVM Performance & Benchmarks</h3>
+    <h3>EVM Performance &amp; Benchmarks</h3>
     <ul>
-      <li>ModExp repricing: compare Besu vs Nethermind, native vs Java (ModExp Benchmarks - r6a.2xlarge)</li>
-      <li>Stack opcodes (address, coinbase, basefee, etc.)</li>
-      <li>Storage opcodes</li>
+      <li>ModExp repricing: Besu vs Nethermind</li>
+      <li>Stack & storage opcodes</li>
       <li>Other EVM opcodes</li>
     </ul>
     <h3>Performance Devnets</h3>
     <ul>
-      <li>Nethermind: Performance Devnet 2 (100M gas) – block building issue (Fabio) – <a href="https://github.com/hyperledger/besu/tree/performance" target="_blank">performance branch</a></li>
-      <li>Besu (Scalenet): 300M gas, load testing – <a href="https://github.com/Consensys/protocols-ansible-playbooks/blob/master/docs/el-cl-devnet.md" target="_blank">Ansible docs</a>, Grafana metrics</li>
+      <li>Nethermind: Devnet 2 (100M gas) – <a href="https://github.com/hyperledger/besu/tree/performance" target="_blank">performance branch</a></li>
+      <li>Besu: Scalenet (300M gas) – <a href="https://github.com/Consensys/protocols-ansible-playbooks/blob/master/docs/el-cl-devnet.md" target="_blank">Ansible docs</a></li>
     </ul>
     <h3>Goals</h3>
     <ul>
-      <li>Identify worst-case Besu performance vs gas pricing under 60M gas</li>
-      <li>Optimize cases where Besu underperforms other clients – <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
+      <li>Assess worst-case Besu gas pricing</li>
+      <li>Optimize underperforming cases – <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
     </ul>
     <ul>
-      <li>Github issues: <a href="https://github.com/Consensys/protocol-misc/issues/1038" target="_blank">Issue #1038</a> and <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
-      <li>Block size vs gas limit: <a href="https://hackmd.io/65OyNvJGQe-EKALa8BwT1A" target="_blank">Block size vs gas limit</a></li>
+      <li>Github issues: <a href="https://github.com/Consensys/protocol-misc/issues/1038" target="_blank">#1038</a>, <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">#1035</a></li>
+      <li>Block size vs gas limit: <a href="https://hackmd.io/65OyNvJGQe-EKALa8BwT1A" target="_blank">HackMD</a></li>
       <li>Gas limit on mainnet: <a href="https://gaslimit.pics/" target="_blank">gaslimit.pics</a></li>
-      <li>Besu block processing CPU profile: <a href="https://hackmd.io/@8AY4P2cSSJaZliiRSkWAgw/r1TT4UUC1e" target="_blank">Besu CPU profile</a></li>
-      <li>EIP‑7938 Exponential Gas Limit Increase: <a href="https://ethereum-magicians.org/t/eip-7938-exponential-gas-limit-increase-via-default-client-voting-behavior/23884" target="_blank">EIP‑7938</a></li>
-      <li>EIP‑7825 Transaction gas limit: <a href="https://eips.ethereum.org/EIPS/eip-7825" target="_blank">EIP‑7825</a></li>
-      <li>EIP‑7935 Set default gas limit to XX0M: <a href="https://ethereum-magicians.org/t/eip-7935-set-default-gas-limit-to-xx0m/23789" target="_blank">EIP‑7935</a></li>
-      <li>EIP‑7934 RLP execution block size limit: <a href="https://eips.ethereum.org/EIPS/eip-7934" target="_blank">EIP‑7934</a></li>
-    </ul>
-    <ul>
-      <li>Nethermind: Performance Devnet 2 (100M gas) – block building issue (Fabio) – <a href="https://github.com/hyperledger/besu/tree/performance" target="_blank">performance branch</a></li>
-      <li>Besu (Scalenet): 300M gas, load testing – <a href="https://github.com/Consensys/protocols-ansible-playbooks/blob/master/docs/el-cl-devnet.md" target="_blank">Ansible docs</a>, Grafana metrics</li>
-    </ul>
-    <h3>Goals</h3>
-    <ul>
-      <li>Identify worst-case Besu performance vs gas pricing under 60M gas</li>
-      <li>Optimize cases where Besu underperforms other clients – <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
-    </ul>
-    <h3>Pre-reads</h3>
-    <ul>
-      <li>Github issues: <a href="https://github.com/Consensys/protocol-misc/issues/1038" target="_blank">Issue #1038</a> and <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
-      <li>Block size vs gas limit: <a href="https://hackmd.io/65OyNvJGQe-EKALa8BwT1A" target="_blank">Block size vs gas limit</a></li>
-      <li>Gas limit on mainnet: <a href="https://gaslimit.pics/" target="_blank">gaslimit.pics</a></li>
-      <li>Besu block processing CPU profile: <a href="https://hackmd.io/@8AY4P2cSSJaZliiRSkWAgw/r1TT4UUC1e" target="_blank">Besu CPU profile</a></li>
-      <li>EIP‑7938 Exponential Gas Limit Increase: <a href="https://ethereum-magicians.org/t/eip-7938-exponential-gas-limit-increase-via-default-client-voting-behavior/23884" target="_blank">EIP‑7938</a></li>
-      <li>EIP‑7825 Transaction gas limit: <a href="https://eips.ethereum.org/EIPS/eip-7825" target="_blank">EIP‑7825</a></li>
-      <li>EIP‑7935 Set default gas limit to XX0M: <a href="https://ethereum-magicians.org/t/eip-7935-set-default-gas-limit-to-xx0m/23789" target="_blank">EIP‑7935</a></li>
-      <li>EIP‑7934 RLP execution block size limit: <a href="https://eips.ethereum.org/EIPS/eip-7934" target="_blank">EIP‑7934</a></li>
+      <li>Besu CPU profile: <a href="https://hackmd.io/@8AY4P2cSSJaZliiRSkWAgw/r1TT4UUC1e" target="_blank">HackMD Profile</a></li>
+      <li>EIP‑7938: <a href="https://ethereum-magicians.org/t/eip-7938-exponential-gas-limit-increase-via-default-client-voting-behavior/23884" target="_blank">Magicians</a></li>
+      <li>EIP‑7825: <a href="https://eips.ethereum.org/EIPS/eip-7825" target="_blank">EIP-7825</a></li>
+      <li>EIP‑7935: <a href="https://ethereum-magicians.org/t/eip-7935-set-default-gas-limit-to-xx0m/23789" target="_blank">Magicians</a></li>
+      <li>EIP‑7934: <a href="https://eips.ethereum.org/EIPS/eip-7934" target="_blank">EIP-7934</a></li>
     </ul>
   </section>
   <section id="bals">
     <h2>Block-Level Access Lists (BALs)</h2>
     <ul>
-      <li>Evaluate BALs performance vs protocol value</li>
-      <li>Open design questions (reads vs writes)</li>
-      <li>Cross-client implementation blockers</li>
+      <li>Evaluate BALs vs protocol value</li>
+      <li>Open design questions</li>
+      <li>Client implementation blockers</li>
     </ul>
-    <p><strong>Pre-reads:</strong> <a href="https://eips.ethereum.org/EIPS/eip-7928" target="_blank">EIP‑7928</a>, <a href="https://ethresear.ch/t/block-level-access-lists/" target="_blank">ethresear.ch thread</a></p>
-    <p><strong>Discord:</strong> #block-access-lists</p>
+    <p>Pre-reads: <a href="https://eips.ethereum.org/EIPS/eip-7928" target="_blank">EIP-7928</a>, <a href="https://ethresear.ch/t/block-level-access-lists/" target="_blank">ethresear.ch</a></p>
+    <p>Discord: #block-access-lists</p>
   </section>
 </main>
 </body>
