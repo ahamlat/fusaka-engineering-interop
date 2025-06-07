@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fusaka Engineering Interop</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 1em; line-height: 1.6; }
+    h1, h2 { color: #333; }
+    ul { margin-left: 1em; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Fusaka Engineering Interop</h1>
+
+  <h2 id="pre-work">Pre-work</h2>
+  <ul>
+    <li>Install <a href="https://www.kurtosis.com/" target="_blank">Kurtosis</a> and run <code>devnet-1</code> via <a href="https://github.com/ethpandaops/ethereum-package" target="_blank">ethpandaops/ethereum-package</a></li>
+    <li>More info: <a href="https://www.notion.so/consensys/Devnet-Testing-and-Tooling-181fc61a326e80b5a1bbe549582c" target="_blank">Devnet Testing and Tooling</a></li>
+    <li>
+      <strong>Devnet 1:</strong>
+      <ul>
+        <li><code>kurtosis run --enclave fusakadevnet1 github.com/ethpandaops/ethereum-package --args-file ./fusaka-devnet-1.yaml --image-download always</code></li>
+        <li>Edit config (e.g., Besu + 2 ELs, max 2 CLs): <a href="https://notes.ethereum.org/@ethpandaops/fusaka-devnet-1#Kurtosis-Interop-Conifg-Pre-devnet-testing" target="_blank">Config</a></li>
+      </ul>
+    </li>
+    <li>
+      <strong>Devnet 0:</strong>
+      <ul>
+        <li><code>kurtosis run --enclave fusakadevnet0 github.com/ethpandaops/ethereum-package --args-file ./fusaka-devnet-0.yaml --image-download always</code></li>
+        <li>Edit config as needed; note Erigon image is incorrect as of 2025-06-05 – <a href="https://notes.ethereum.org/@ethpandaops/fusaka-devnet-0#Kurtosis-Interop-Conifg-Pre-devnet-testing" target="_blank">Config</a></li>
+      </ul>
+    </li>
+    <li>Inspect a node: <code>kurtosis service logs -f fusakadevnet1 el-2-besu-lodestar</code></li>
+    <li>Clean all: <code>kurtosis clean -a</code></li>
+  </ul>
+
+  <h2 id="images">Interop Images</h2>
+  <ul>
+    <li>Branches built hourly: <a href="https://github.com/ethpandaops/eth-client-docker-image-builder/blob/master/branches.yaml" target="_blank">branches.yaml</a></li>
+    <li>Trigger manual build via Discord: <code>/build client-el {client} {repo?} {ref?} {docker_tag?} {build_args?}</code></li>
+  </ul>
+  <p><strong>Fusaka Meta EIP (Besu):</strong> <a href="https://eips.ethereum.org/EIPS/eip-7607" target="_blank">EIP-7607</a></p>
+
+  <h2 id="devnet-2">Devnet‑2 (Targets)</h2>
+  <ul>
+    <li>✅ EIP‑5920: PAY opcode (Besu PR)</li>
+    <li>RIP‑7212: Precompile for secp256r1 Curve Support (Draft PR)</li>
+    <li>EIP‑7907: Meter Contract Code Size And Increase Limit</li>
+    <li>EIP‑7934: RLP Execution Block Size Limit</li>
+  </ul>
+
+  <h2 id="devnet-1-contains">Devnet‑1 Includes</h2>
+  <ul>
+    <li>✅ EIP‑7825: Transaction Gas Limit Cap</li>
+    <li>✅ EIP‑7918: Blob Base Fee Bounded by Execution Cost</li>
+    <li>✅ EIP‑7594: PeerDAS – Peer Data Availability Sampling</li>
+    <li>✅ EIP‑7823: ModeXP Upper Bounds</li>
+    <li>✅ EIP‑7883: ModExp Gas Cost Increase</li>
+    <li>✅ EIP‑7892: Blob Parameter Only Hardforks</li>
+  </ul>
+
+  <h2 id="performance">Performance & L1 Scalability</h2>
+  <h3>Gas Limit ≥ 60M</h3>
+  <ul>
+    <li>Sepolia analysis (60M gas on Besu): <a href="https://docs.google.com/document/d/1fVXFp9Lcw_NiryjqiYOsjZRPHWjmucb4HpJhaXaEmgw/edit?tab=t.0" target="_blank">Doc</a></li>
+    <li>Discussion on TG: default 60M gas on Besu? (Erigon, Nethermind, Reth already)</li>
+  </ul>
+  <h3>EVM Performance & Benchmarks</h3>
+  <ul>
+    <li>ModExp repricing: compare Besu vs Nethermind, native vs Java (ModExp Benchmarks - r6a.2xlarge)</li>
+    <li>Stack opcodes (address, coinbase, basefee, etc.)</li>
+    <li>Storage opcodes</li>
+    <li>Other EVM opcodes</li>
+  </ul>
+  <h3>Performance Devnets</h3>
+  <ul>
+    <li>Nethermind: Performance Devnet 2 (100M gas) – block building issue (Fabio) – <a href="https://github.com/hyperledger/besu/tree/performance" target="_blank">performance branch</a></li>
+    <li>Besu (Scalenet): 300M gas, load testing – <a href="https://github.com/Consensys/protocols-ansible-playbooks/blob/master/docs/el-cl-devnet.md" target="_blank">Ansible docs</a>, Grafana metrics</li>
+  </ul>
+
+  <h2 id="goals">Goals</h2>
+  <ul>
+    <li>Identify worst-case Besu performance vs gas pricing under 60M gas</li>
+    <li>Optimize cases where Besu underperforms other clients – <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
+  </ul>
+
+  <h2 id="pre-reads">Pre-reads</h2>
+  <ul>
+    <li><a href="https://github.com/Consensys/protocol-misc/issues/1038" target="_blank">Issue #1038</a>, <a href="https://github.com/Consensys/protocol-misc/issues/1035" target="_blank">Issue #1035</a></li>
+    <li><a href="https://hackmd.io/65OyNvJGQe-EKALa8BwT1A" target="_blank">Block size vs gas limit</a></li>
+    <li><a href="https://gaslimit.pics/" target="_blank">Gas limit on mainnet</a></li>
+    <li><a href="https://hackmd.io/@8AY4P2cSSJaZliiRSkWAgw/r1TT4UUC1e" target="_blank">Besu CPU profile</a></li>
+    <li><a href="https://ethereum-magicians.org/t/eip-7938-exponential-gas-limit-increase-via-default-client-voting-behavior/23884" target="_blank">EIP‑7938</a></li>
+    <li><a href="https://eips.ethereum.org/EIPS/eip-7825" target="_blank">EIP‑7825</a></li>
+    <li><a href="https://ethereum-magicians.org/t/eip-7935-set-default-gas-limit-to-xx0m/23789" target="_blank">EIP‑7935</a></li>
+    <li><a href="https://eips.ethereum.org/EIPS/eip-7934" target="_blank">EIP‑7934</a></li>
+  </ul>
+
+  <h2 id="block-level-access-lists">Block-Level Access Lists (BALs)</h2>
+  <ul>
+    <li>Evaluate BALs performance vs protocol value</li>
+    <li>Open design questions (reads vs writes)</li>
+    <li>Cross-client implementation blockers</li>
+  </ul>
+  <p><strong>Pre-reads:</strong> <a href="https://eips.ethereum.org/EIPS/eip-7928" target="_blank">EIP‑7928</a>, <a href="https://ethresear.ch/t/block-level-access-lists/" target="_blank">ethresear.ch thread</a></p>
+  <p><strong>Discord:</strong> #block-access-lists</p>
+</body>
+</html>
